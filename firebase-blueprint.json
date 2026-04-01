@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Event": {
+      "title": "Event",
+      "description": "A networking event or conference.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Name of the event." },
+        "location": { "type": "string", "description": "Location of the event." },
+        "date": { "type": "string", "format": "date", "description": "Date of the event." },
+        "userId": { "type": "string", "description": "Owner of the event record." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "userId", "createdAt"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "A single scanning session within an event.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Optional name for the session." },
+        "eventId": { "type": "string", "description": "Reference to the event." },
+        "userId": { "type": "string", "description": "Owner of the session." },
+        "contactCount": { "type": "number", "description": "Number of contacts scanned in this session." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "createdAt"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "A business contact extracted from a business card.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the person." },
+        "email": { "type": "string", "format": "email", "description": "Email address." },
+        "phone": { "type": "string", "description": "Phone number." },
+        "jobTitle": { "type": "string", "description": "Job title or position." },
+        "company": { "type": "string", "description": "Company name." },
+        "website": { "type": "string", "description": "Company website." },
+        "address": { "type": "string", "description": "Physical address." },
+        "notes": { "type": "string", "description": "Additional notes or context." },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Custom tags." },
+        "isFavorite": { "type": "boolean", "description": "Marked as favorite." },
+        "isHotLead": { "type": "boolean", "description": "Marked as a hot lead." },
+        "sessionId": { "type": "string", "description": "Reference to the scanning session." },
+        "eventId": { "type": "string", "description": "Reference to the event." },
+        "userId": { "type": "string", "description": "The ID of the user who owns this contact." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the contact was scanned." }
+      },
+      "required": ["name", "userId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/events/{eventId}": {
+      "schema": "Event",
+      "description": "Collection of networking events."
+    },
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "Collection of scanning sessions."
+    },
+    "/contacts/{contactId}": {
+      "schema": "Contact",
+      "description": "Collection of scanned business contacts."
+    }
+  }
+}

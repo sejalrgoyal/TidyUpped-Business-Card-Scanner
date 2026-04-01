@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: events
+    // Fields: name (string), location (string), date (string), userId (string), createdAt (string)
+    //
+    // Collection: sessions
+    // Fields: name (string), eventId (string), userId (string), contactCount (number), createdAt (string)
+    //
+    // Collection: contacts
+    // Fields: name, email, phone, jobTitle, company, website, address, notes, tags (list), isFavorite, isHotLead, sessionId, eventId, userId, createdAt
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && 
+             (('userId' in resource.data && resource.data.userId == request.auth.uid) || 
+              (request.auth.token.email == "Sejalrgoyal@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidString(val, max) {
+      return val is string && val.size() <= max;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // Domain Validators
+    function isValidEvent(data) {
+      return data.keys().hasAll(['name', 'userId', 'createdAt']) &&
+             isValidString(data.name, 100) &&
+             data.userId == request.auth.uid;
+    }
+
+    function isValidSession(data) {
+      return data.keys().hasAll(['userId', 'createdAt']) &&
+             data.userId == request.auth.uid;
+    }
+
+    function isValidContact(data) {
+      return data.keys().hasAll(['name', 'userId', 'createdAt']) &&
+             isValidString(data.name, 100) &&
+             data.userId == request.auth.uid &&
+             (!('email' in data) || isValidEmail(data.email)) &&
+             (!('tags' in data) || data.tags is list);
+    }
+
+    // Rules
+    match /events/{eventId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidEvent(request.resource.data);
+      allow update: if isDocOwner() && isValidEvent(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidSession(request.resource.data);
+      allow update: if isDocOwner() && isValidSession(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+
+    match /contacts/{contactId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && isValidContact(request.resource.data);
+      allow update: if isDocOwner() && isValidContact(request.resource.data);
+      allow delete: if isDocOwner();
+    }
+  }
+}

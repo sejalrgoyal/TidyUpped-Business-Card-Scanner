@@ -1,0 +1,7 @@
+{
+  "name": "TidyUpped Business Card Scanner",
+  "description": "AI-powered business card scanner for effortless contact management.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

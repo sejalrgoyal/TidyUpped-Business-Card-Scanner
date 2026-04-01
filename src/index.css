@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --raw-brand-primary: #00548B;
+  --raw-brand-accent: #8DC63F;
+  --raw-brand-secondary: #0072BC;
+  --raw-brand-bg: #F8FAFC;
+  --raw-brand-card: #FFFFFF;
+  --raw-brand-muted: #64748B;
+  
+  --raw-vibrant-orange: #FF6321;
+  --raw-vibrant-blue: #0072BC;
+  --raw-vibrant-purple: #8B5CF6;
+  --raw-vibrant-pink: #EC4899;
+  --raw-vibrant-emerald: #8DC63F;
+}
+
+.dark {
+  --raw-brand-bg: #0F172A;
+  --raw-brand-card: #1E293B;
+  --raw-brand-primary: #F8FAFC;
+  --raw-brand-muted: #94A3B8;
+}
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  --color-brand-primary: var(--raw-brand-primary);
+  --color-brand-accent: var(--raw-brand-accent);
+  --color-brand-secondary: var(--raw-brand-secondary);
+  --color-brand-bg: var(--raw-brand-bg);
+  --color-brand-card: var(--raw-brand-card);
+  --color-brand-muted: var(--raw-brand-muted);
+  
+  --color-vibrant-orange: var(--raw-vibrant-orange);
+  --color-vibrant-blue: var(--raw-vibrant-blue);
+  --color-vibrant-purple: var(--raw-vibrant-purple);
+  --color-vibrant-pink: var(--raw-vibrant-pink);
+  --color-vibrant-emerald: var(--raw-vibrant-emerald);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-brand-bg);
+    color: var(--color-brand-primary);
+    @apply font-sans antialiased transition-colors duration-300;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-accent);
+    color: #000000;
+  }
+
+  .dark ::selection {
+    background-color: var(--color-brand-accent);
+    color: #000000;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+    color: var(--color-brand-primary);
+  }
+}
+
+.glass {
+  @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/20 dark:border-white/10;
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 10px -2px rgba(0, 0, 0, 0.02);
+  .dark & {
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3), 0 2px 10px -2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+.tidy-gradient {
+  background: linear-gradient(135deg, #FF6321 0%, #EC4899 100%);
+}
+
+.vibrant-gradient-blue {
+  background: linear-gradient(135deg, #0072BC 0%, #00548B 100%);
+}
+
+.vibrant-gradient-emerald {
+  background: linear-gradient(135deg, #8DC63F 0%, #0072BC 100%);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-card, .print-card * {
+    visibility: visible;
+  }
+  .print-card {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+  .print-card .qrcode-container {
+    margin: 0 auto;
+  }
+}
