@@ -58,13 +58,13 @@
   }
 
   ::selection {
-    background-color: var(--color-brand-accent);
-    color: #000000;
+    background-color: #FF6321;
+    color: white;
   }
 
   .dark ::selection {
-    background-color: var(--color-brand-accent);
-    color: #000000;
+    background-color: #8DC63F;
+    color: #0F172A;
   }
   
   h1, h2, h3, h4 {

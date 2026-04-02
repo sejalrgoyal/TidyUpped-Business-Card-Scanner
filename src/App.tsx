@@ -54,7 +54,6 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDropzone } from 'react-dropzone';
-import confetti from 'canvas-confetti';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -713,6 +712,8 @@ export default function App() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<{ file: File | null, preview: string }[]>([]);
+  const [processingResult, setProcessingResult] = useState<{ count: number, duplicates: number } | null>(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
   const [followUpContact, setFollowUpContact] = useState<Contact | null>(null);
   const [followUpMessage, setFollowUpMessage] = useState('');
@@ -1461,12 +1462,6 @@ END:VCARD\n`;
     setUserProfile(newProfile);
     setIsProfileEditorOpen(false);
     setToast('Profile updated successfully!');
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#F27D26', '#3B82F6', '#10B981']
-    });
   };
 
   // --- Data ---
@@ -1614,45 +1609,56 @@ END:VCARD\n`;
   };
 
   // --- Scanning ---
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    if (!user) return;
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newFiles = acceptedFiles.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    setPendingFiles(prev => [...prev, ...newFiles]);
+  }, []);
+
+  const removePendingFile = (index: number) => {
+    setPendingFiles(prev => {
+      const newFiles = [...prev];
+      URL.revokeObjectURL(newFiles[index].preview);
+      newFiles.splice(index, 1);
+      return newFiles;
+    });
+  };
+
+  const handleStartProcessing = async () => {
+    if (!user || pendingFiles.length === 0) return;
     
     setIsProcessing(true);
+    let processedCount = 0;
+    let initialDuplicates = duplicateQueue.length;
     
     try {
-      let count = 0;
-      for (const file of acceptedFiles) {
-        count++;
-        setProcessingMessage(`Reading card ${count} of ${acceptedFiles.length}...`);
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-        
-        const base64 = await base64Promise;
-        await processImage(base64);
+      for (let i = 0; i < pendingFiles.length; i++) {
+        const { file, preview } = pendingFiles[i];
+        setProcessingMessage(`Reading card ${i + 1} of ${pendingFiles.length}...`);
+        await processImage(preview);
+        processedCount++;
       }
       
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#FF6321', '#3B82F6', '#10B981']
-      });
+      // Clear pending files
+      pendingFiles.forEach(f => URL.revokeObjectURL(f.preview));
+      setPendingFiles([]);
       
-      if (duplicateQueue.length > 0) {
+      const duplicatesFound = duplicateQueue.length - initialDuplicates;
+      setProcessingResult({ count: processedCount, duplicates: duplicatesFound });
+      
+      if (duplicateQueue.length > 0 && !currentDuplicate) {
         setCurrentDuplicate(duplicateQueue[0]);
         setDuplicateQueue(prev => prev.slice(1));
-      } else {
-        setToast(`Successfully processed ${acceptedFiles.length} cards!`);
       }
     } catch (err) {
       console.error('Processing failed', err);
+      setToast(err instanceof Error ? err.message : 'Processing failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
-  }, [user]);
+  };
 
   const processImage = async (base64: string) => {
     if (!user) return;
@@ -1733,22 +1739,9 @@ END:VCARD\n`;
     }
   };
 
-  const handleCameraCapture = async (base64: string) => {
-    setIsProcessing(true);
-    setProcessingMessage('Reading your card...');
-    try {
-      await processImage(base64);
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#0F172A', '#10B981', '#F27D26']
-      });
-    } catch (err) {
-      console.error('Camera processing failed', err);
-    } finally {
-      setIsProcessing(false);
-    }
+  const handleCameraCapture = (base64: string) => {
+    setPendingFiles(prev => [...prev, { file: null, preview: base64 }]);
+    setIsCameraOpen(false);
   };
 
   const handleMergeContacts = async (masterId: string, duplicateIds: string[]) => {
@@ -2079,6 +2072,37 @@ END:VCARD\n`;
         )}
       </AnimatePresence>
 
+      {/* Success Result Modal */}
+      <AnimatePresence>
+        {processingResult && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-brand-card dark:bg-slate-900 w-full max-w-sm rounded-[40px] overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800"
+            >
+              <div className="p-10 text-center">
+                <div className="w-20 h-20 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <CheckCircle2 size={40} />
+                </div>
+                <h3 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-2">Processing Complete</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-8">
+                  Successfully processed {processingResult.count} card{processingResult.count !== 1 ? 's' : ''}.
+                  {processingResult.duplicates > 0 && ` ${processingResult.duplicates} duplicate${processingResult.duplicates !== 1 ? 's' : ''} found.`}
+                </p>
+                <button
+                  onClick={() => setProcessingResult(null)}
+                  className="w-full py-4 bg-brand-primary text-white dark:text-slate-900 rounded-2xl font-bold hover:bg-brand-primary/90 transition-all shadow-lg shadow-brand-primary/20"
+                >
+                  Got it
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Demo Mode Banner */}
       {isDemoMode && (
         <div className="bg-brand-primary text-white dark:text-slate-900 py-2 px-6 text-center text-xs font-bold uppercase tracking-[0.2em] relative z-50 flex items-center justify-center gap-4">
@@ -2296,40 +2320,58 @@ END:VCARD\n`;
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Recent Scans */}
-                  {contacts.length > 0 && (
-                    <section className="pt-12">
-                      <div className="text-center mb-12">
-                        <h2 className="text-4xl font-bold tracking-tight mb-3 dark:text-white">Recent Scans</h2>
-                        <p className="text-slate-500 text-lg">Review and organize your latest connections</p>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {filteredContacts.slice(0, 6).map(contact => (
-                          <ContactCard 
-                            key={contact.id}
-                            contact={contact} 
-                            onUpdate={handleUpdateContact}
-                            onDelete={handleDeleteContact}
-                            onDownloadVCard={downloadVCard}
-                            onGenerateFollowUp={handleGenerateFollowUp}
-                            onScheduleFollowUp={handleScheduleFollowUp}
-                          />
-                        ))}
-                      </div>
-                      
-                      {filteredContacts.length > 6 && (
-                        <div className="mt-12 text-center">
-                          <Button variant="secondary" onClick={() => setActiveTab('dashboard')}>
-                            View All {filteredContacts.length} Contacts
-                          </Button>
+                      {/* Pending Files Ribbon */}
+                      {pendingFiles.length > 0 && (
+                        <div className="mt-8 w-full">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-sm font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                              Pending Photos ({pendingFiles.length})
+                            </h4>
+                            <button 
+                              onClick={() => setPendingFiles([])}
+                              className="text-xs font-bold text-red-500 hover:underline"
+                            >
+                              Clear All
+                            </button>
+                          </div>
+                          <div className="flex gap-4 overflow-x-auto pb-4 pt-2 pr-2 scrollbar-hide">
+                            {pendingFiles.map((file, idx) => (
+                              <div key={idx} className="relative flex-shrink-0 group">
+                                <img 
+                                  src={file.preview} 
+                                  alt={`Pending ${idx}`} 
+                                  className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-2xl border-2 border-slate-100 dark:border-slate-700 group-hover:border-brand-primary transition-all"
+                                />
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); removePendingFile(idx); }}
+                                  className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <X size={14} />
+                                </button>
+                              </div>
+                            ))}
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); open(); }}
+                              className="w-24 h-24 md:w-32 md:h-32 flex-shrink-0 flex items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-brand-primary hover:bg-brand-primary/5 transition-all"
+                            >
+                              <Plus size={32} className="text-slate-400 dark:text-slate-600" />
+                            </button>
+                          </div>
+                          
+                          <div className="mt-8 flex justify-center">
+                            <button 
+                              onClick={(e) => { e.stopPropagation(); handleStartProcessing(); }}
+                              className="bg-brand-primary text-white dark:text-slate-900 px-12 py-5 rounded-[24px] font-black text-lg flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-2xl shadow-brand-primary/30 active:scale-95"
+                            >
+                              <Sparkles size={24} />
+                              Process {pendingFiles.length} Card{pendingFiles.length !== 1 ? 's' : ''}
+                            </button>
+                          </div>
                         </div>
                       )}
-                    </section>
-                  )}
+                    </div>
+                  </div>
                 </div>
               )}
             </motion.div>

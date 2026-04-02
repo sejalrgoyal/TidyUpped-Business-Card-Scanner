@@ -1,6 +1,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const apiKey = process.env.GEMINI_API_KEY;
+console.log("GEMINI_API_KEY exists:", !!apiKey);
+const ai = new GoogleGenAI({ apiKey: apiKey || "" });
 
 export interface ExtractedContact {
   name: string;
@@ -33,23 +35,24 @@ const contactSchema = {
 
 export async function extractContactsFromImage(base64Image: string): Promise<ExtractedContact[]> {
   try {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("GEMINI_API_KEY is not set.");
+    }
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
-      contents: [
-        {
-          parts: [
-            {
-              inlineData: {
-                mimeType: "image/jpeg",
-                data: base64Image.split(",")[1] || base64Image,
-              },
+      contents: {
+        parts: [
+          {
+            inlineData: {
+              mimeType: "image/jpeg",
+              data: base64Image.split(",")[1] || base64Image,
             },
-            {
-              text: "Extract all business card information from this image. There might be multiple cards. Structure the output as a list of contacts.",
-            },
-          ],
-        },
-      ],
+          },
+          {
+            text: "Extract all business card information from this image. There might be multiple cards. Structure the output as a list of contacts.",
+          },
+        ],
+      },
       config: {
         responseMimeType: "application/json",
         responseSchema: contactSchema,
@@ -57,11 +60,14 @@ export async function extractContactsFromImage(base64Image: string): Promise<Ext
       },
     });
 
-    if (!response.text) return [];
+    if (!response.text) {
+      console.error("Gemini API returned empty response.");
+      return [];
+    }
     return JSON.parse(response.text);
   } catch (error) {
     console.error("Error extracting contacts:", error);
-    throw error;
+    throw new Error(`Failed to call the Gemini API: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 

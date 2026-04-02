@@ -385,15 +385,10 @@ export const AllContacts: React.FC<AllContactsProps> = ({
                   </>
                 )}
               </h3>
-              <p className="text-slate-400 dark:text-slate-300 text-xs md:text-sm font-medium mt-1">
-                {viewMode === 'events' 
-                  ? `Managing ${events.length} networking events` 
-                  : `Browsing ${filteredAndSortedContacts.length} total connections`}
-              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              <div className="relative flex-1 min-w-full md:min-w-0 md:w-64">
+              <div className="relative flex-1 min-w-full md:min-w-0 md:w-80">
                 <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-300" />
                 <input 
                   type="text"
@@ -585,24 +580,24 @@ export const AllContacts: React.FC<AllContactsProps> = ({
                   </AnimatePresence>
 
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-separate border-spacing-0">
                     <thead>
-                      <tr className="bg-slate-50/50 dark:bg-slate-900/50">
-                        <th className="pl-10 pr-4 py-5 w-12 border-b border-slate-100 dark:border-slate-700">
+                      <tr className="bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10">
+                        <th className="pl-10 pr-4 py-6 w-12 border-b border-slate-100 dark:border-slate-700">
                           <div className="flex items-center justify-center">
                             <input 
                               type="checkbox" 
                               checked={selectedEventIds.size === events.length && events.length > 0}
                               onChange={toggleSelectAllEvents}
-                              className="w-4 h-4 rounded border-slate-400 dark:border-slate-700 text-brand-primary focus:ring-brand-primary dark:bg-slate-800 transition-all cursor-pointer"
+                              className="w-5 h-5 rounded-lg border-slate-400 dark:border-slate-700 text-brand-primary focus:ring-brand-primary dark:bg-slate-800 transition-all cursor-pointer"
                             />
                           </div>
                         </th>
-                        <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700">Event</th>
-                        <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700">Venue</th>
-                        <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700">Event Date</th>
-                        <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700">Sessions Held</th>
-                        <th className="px-4 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-200 border-b border-slate-100 dark:border-slate-700">New Contacts</th>
+                        <th className="px-6 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700">Event</th>
+                        <th className="px-6 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700">Venue</th>
+                        <th className="px-6 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700">Event Date</th>
+                        <th className="px-6 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700">Sessions Held</th>
+                        <th className="px-6 py-6 text-[11px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700">New Contacts</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50 dark:divide-slate-700">
@@ -642,7 +637,7 @@ export const AllContacts: React.FC<AllContactsProps> = ({
                               transition={{ delay: idx * 0.02 }}
                               className="group hover:bg-slate-50/80 dark:hover:bg-slate-900/50 transition-all duration-300"
                             >
-                                <td className="pl-10 pr-4 py-4">
+                                <td className="pl-10 pr-4 py-6">
                                   <div className="flex items-center justify-center">
                                     <input 
                                       type="checkbox" 
@@ -652,33 +647,33 @@ export const AllContacts: React.FC<AllContactsProps> = ({
                                     />
                                   </div>
                                 </td>
-                                <td className="px-4 py-4">
+                                <td className="px-6 py-6">
                                   <div className="flex items-center gap-5">
-                                    <div className="w-12 h-12 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center font-black text-slate-400 dark:text-slate-300 group-hover:bg-brand-primary dark:group-hover:bg-brand-accent group-hover:text-white dark:group-hover:text-slate-900 transition-all duration-500">
-                                      <Calendar size={20} />
+                                    <div className="w-14 h-14 bg-slate-100 dark:bg-slate-900 rounded-2xl flex items-center justify-center font-black text-slate-400 dark:text-slate-300 group-hover:bg-brand-primary dark:group-hover:bg-brand-accent group-hover:text-white dark:group-hover:text-slate-900 transition-all duration-500">
+                                      <Calendar size={24} />
                                     </div>
                                     <div>
-                                      <div className="font-bold text-slate-900 dark:text-white text-sm tracking-tight">{event.name}</div>
-                                      <div className="text-[10px] text-slate-400 dark:text-slate-300 font-medium uppercase tracking-widest">{event.type || 'Networking Event'}</div>
+                                      <div className="font-bold text-slate-900 dark:text-white text-base tracking-tight">{event.name}</div>
+                                      <div className="text-[11px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-[0.1em] mt-0.5">{event.type || 'Networking Event'}</div>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="px-4 py-4 text-[10px] text-slate-600 dark:text-slate-300 font-mono font-bold uppercase tracking-widest">{event.location || '-'}</td>
-                                <td className="px-4 py-4 text-[11px] text-slate-600 dark:text-slate-300 font-mono tracking-tight">{format(new Date(event.date), 'MMM dd, yyyy')}</td>
-                                <td className="px-4 py-4">
-                                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-xl">
-                                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-300">
+                                <td className="px-6 py-6 text-[11px] text-slate-600 dark:text-slate-300 font-mono font-bold uppercase tracking-widest">{event.location || '-'}</td>
+                                <td className="px-6 py-6 text-[12px] text-slate-600 dark:text-slate-300 font-mono tracking-tight">{format(new Date(event.date), 'MMM dd, yyyy')}</td>
+                                <td className="px-6 py-6">
+                                  <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-700 rounded-2xl">
+                                    <span className="text-[12px] font-mono font-bold text-slate-700 dark:text-slate-200">
                                       {eventSessions.length}
                                     </span>
-                                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest">Sessions</span>
+                                    <span className="text-[10px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest">Sessions</span>
                                   </div>
                                 </td>
-                                <td className="px-4 py-4">
-                                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-primary/5 dark:bg-brand-accent/5 border border-brand-primary/10 dark:border-brand-accent/10 rounded-xl">
-                                    <span className="text-[11px] font-mono text-brand-primary dark:text-brand-accent">
+                                <td className="px-6 py-6">
+                                  <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-brand-primary/5 dark:bg-brand-accent/5 border border-brand-primary/10 dark:border-brand-accent/10 rounded-2xl">
+                                    <span className="text-[12px] font-mono font-bold text-brand-primary dark:text-brand-accent">
                                       {eventContacts.length}
                                     </span>
-                                    <span className="text-[9px] font-black text-brand-primary/60 dark:text-brand-accent/60 uppercase tracking-widest">Contacts</span>
+                                    <span className="text-[10px] font-black text-brand-primary/60 dark:text-brand-accent/60 uppercase tracking-widest">Contacts</span>
                                   </div>
                                 </td>
                               </motion.tr>
@@ -1048,7 +1043,7 @@ export const AllContacts: React.FC<AllContactsProps> = ({
                                       e.stopPropagation();
                                       onDeleteContact(contact.id);
                                     }}
-                                    className="p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
+                                    className="p-2 text-slate-400 dark:text-slate-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all"
                                     title="Delete Contact"
                                   >
                                     <Trash2 size={16} />
@@ -1469,7 +1464,10 @@ export const AllContacts: React.FC<AllContactsProps> = ({
 
               {/* Sidebar Footer */}
               <div className="p-8 border-t border-slate-50 dark:border-slate-800">
-                <button className="w-full py-4 bg-brand-primary text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 group shadow-lg shadow-brand-primary/20 dark:shadow-none">
+                <button 
+                  onClick={() => handleLinkedInSearch(selectedContact.name, selectedContact.company)}
+                  className="w-full py-4 bg-brand-primary text-white dark:text-slate-900 rounded-2xl font-bold text-sm hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 group shadow-lg shadow-brand-primary/20 dark:shadow-none"
+                >
                   Full Profile Details
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>

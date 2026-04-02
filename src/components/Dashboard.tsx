@@ -615,7 +615,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
         {kpis.map((kpi, i) => {
           const growth = getGrowth(kpi.value, kpi.prevValue);
           return (
-            <div key={i} className="bg-brand-card dark:bg-slate-800 p-6 md:p-8 rounded-[24px] md:rounded-[32px] border border-slate-100 dark:border-slate-700 card-shadow group hover:border-brand-primary/20 transition-all">
+            <div 
+              key={i} 
+              onClick={() => onNavigate('contacts')}
+              className="bg-brand-card dark:bg-slate-800 p-6 md:p-8 rounded-[24px] md:rounded-[32px] border border-slate-100 dark:border-slate-700 card-shadow group hover:border-brand-primary/20 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+            >
               <div className="flex items-center justify-between mb-6">
                 <div className={cn("p-3 rounded-2xl", kpi.bg)}>
                   <kpi.icon size={20} className={kpi.color} />
@@ -961,7 +965,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {filteredContacts.map((c, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-brand-primary/30 transition-all group">
+                      <div 
+                        key={i} 
+                        onClick={() => setSelectedContact(c)}
+                        className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-brand-primary/30 transition-all group cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                      >
                         <div className="flex items-center gap-4">
                           <div className={cn(
                             "w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-sm",
@@ -1017,10 +1025,10 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Follow-up Reminders & Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Follow-up Reminders */}
+      <div className="grid grid-cols-1 gap-8">
         {/* Follow-up Reminders */}
-        <div className="lg:col-span-4 bg-brand-card dark:bg-slate-800 p-6 md:p-10 rounded-[24px] md:rounded-[40px] border border-slate-100 dark:border-slate-700 card-shadow">
+        <div className="bg-brand-card dark:bg-slate-800 p-6 md:p-10 rounded-[24px] md:rounded-[40px] border border-slate-100 dark:border-slate-700 card-shadow">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-bold tracking-tight dark:text-white">Follow-up Reminders</h3>
             <div className="p-2 bg-orange-50 dark:bg-orange-500/10 text-orange-500 rounded-xl">
@@ -1033,7 +1041,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <p className="text-slate-400 dark:text-slate-300 text-sm">No upcoming follow-ups scheduled.</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {followUpReminders.map((c, i) => {
                 const daysLeft = differenceInDays(c.followUpDate, new Date());
                 return (
@@ -1064,39 +1072,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
               })}
             </div>
           )}
-        </div>
-
-        {/* Recent Activity Feed */}
-        <div className="lg:col-span-8 bg-brand-card dark:bg-slate-800 p-6 md:p-10 rounded-[24px] md:rounded-[40px] border border-slate-100 dark:border-slate-700 card-shadow">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-2xl font-bold tracking-tight dark:text-white">Recent Activity</h3>
-            <button 
-              onClick={() => onNavigate?.('contacts')}
-              className="text-brand-primary dark:text-brand-accent text-[10px] font-bold uppercase tracking-widest hover:underline"
-            >
-              View All
-            </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredContacts.slice(0, 6).map((c, i) => (
-              <div 
-                key={i} 
-                onClick={() => setSelectedContact(c)}
-                className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all group cursor-pointer border border-transparent hover:border-slate-200 dark:hover:border-slate-600"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center text-sm font-bold border border-slate-100 dark:border-slate-700 group-hover:bg-brand-primary group-hover:text-white transition-all text-slate-600 dark:text-slate-300">
-                    {c.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-slate-900 dark:text-white">{c.name}</div>
-                    <div className="text-[10px] text-slate-400 dark:text-slate-300 font-bold uppercase tracking-wider">{c.company || 'Private Entity'}</div>
-                  </div>
-                </div>
-                <ChevronRight size={14} className="text-slate-300 dark:text-slate-600 group-hover:text-brand-primary dark:group-hover:text-brand-accent transition-all" />
-              </div>
-            ))}
-          </div>
         </div>
       </div>
       {/* Quick View Sidebar */}
@@ -1163,7 +1138,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         <Calendar size={18} className="text-brand-primary" />
                         <div>
                           <div className="text-[9px] font-black text-slate-400 dark:text-slate-300 uppercase tracking-widest mb-0.5">Source Event</div>
-                          <div className="text-sm font-bold text-slate-900 dark:text-white">{events.find(e => e.id === selectedContact.eventId)?.name || 'Manual Entry'}</div>
+                          <button 
+                            onClick={() => onNavigate('contacts')}
+                            className="text-sm font-bold text-brand-primary dark:text-brand-accent hover:underline text-left"
+                          >
+                            {events.find(e => e.id === selectedContact.eventId)?.name || 'Manual Entry'}
+                          </button>
                         </div>
                       </div>
                     </div>
